@@ -1,1 +1,60 @@
-
+class C3DFontView : public CView
+{
+  ...
+  CGLFont  m_FontX; // Declare a font object in your view class
+  ...
+};
+int CMy3DFontView::OnCreate(LPCREATESTRUCT lpCreateStruct) // Create view
+{
+  if (CView::OnCreate(lpCreateStruct) == -1)
+    return -1;
+/*
+** Setup font attributes
+*/
+  m_FontX.SetXOffset(-0.4f);
+  m_FontX.SetYOffset(-0.4f);
+  m_FontX.SetXScale(1.4f);
+  m_FontX.SetYScale(1.3f);
+  m_FontX.SetZScale(0.8f);
+  m_FontX.SetXRotate(-20.0f);
+  m_FontX.SetYRotate(-6.0f);
+  m_FontX.SetZRotate(90.0f);
+  wglMakeCurrent(m_pDC->m_hDC,m_hRC);
+  m_FontX.SetFontType(GL_FONT_SOLID); // Select font type
+  m_FontX.CreateFont(m_pDC, "Arial Black"); // Create the font
+  m_FontX.SetText("Xing"); // Select text to render
+  wglMakeCurrent(NULL,NULL);
+}
+void CMy3DFontView::OnDraw(CDC* pDC) // Draw method
+{
+  CMy3DFontDoc* pDoc = GetDocument();
+  ASSERT_VALID(pDoc);
+  ...
+	
+  wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);
+  DrawGLFont(); // Render the text
+  SwapBuffers(m_pDC->GetSafeHdc());
+  wglMakeCurrent(m_pDC->GetSafeHdc(), NULL);
+}
+void CMy3DFontView::DrawGLFont(void) // The render method
+{
+  glShadeModel(GL_SMOOTH);
+  glEnable(GL_DEPTH_TEST);
+	
+  //clear color buffer
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  //set light model
+  glLightfv(GL_LIGHT0, GL_AMBIENT, m_Lightambient); //set light ambient
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, m_Lightdiffuse); //set light specular
+  glLightfv(GL_LIGHT0, GL_SPECULAR, m_Lightspecular); //set light specular
+  glLightfv(GL_LIGHT0, GL_POSITION, m_Lightposition); //set light position
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glTranslatef(-0.5f, 0.0f, -5.0f);
+	
+  m_FontX.GLDrawText(); // Render the text
+  glFlush();
+}
